@@ -1,0 +1,37 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager navigate
+
+
+<PageTitle>Главная</PageTitle>
+
+<h1>Проект</h1>
+
+<div>Вариант .</div>
+<div>Название проекта: ""</div>
+
+<div>
+    Описание проекта: Приложение для создания и управления виртуальными турами.
+</div>
+
+<div>Техническое задание:</div>
+<div>• Разработать классы для мест, туров и гидов.</div>
+<div>• Создать интерфейс для планирования и визуализации туров.</div>
+<div>• Включить возможности для пользователей оставлять отзывы.</div>
+<div>• Использовать Blazor в качестве Web-интерфейса и для интерактивных карт и маршрутов.
+</div>
+
+<div class="button-container">
+    <button class="btn btn-primary" @onclick="NavigateTour">Туры</button>
+    
+</div>
+
+@code {
+
+    void NavigateTour()
+    {
+
+        navigate.NavigateTo("/tours");
+
+    }
+}

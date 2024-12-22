@@ -1,0 +1,102 @@
+﻿@page "/tours"
+@inject ITourService TourService
+
+<h3>Список туров</h3>
+
+@if (tours == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Гид</th>
+                <th>Цена</th>
+                <th>Длительность</th>
+                <th>Изображение</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in tours)
+            {
+                <tr>
+                    <td>@tour.Id</td>
+                    <td>@tour.Title</td>
+                    <td>@tour.Description</td>
+                    <td>@tour.Guide?.Name</td>
+                    <td>@tour.Price.ToString("C")</td>
+                    <td>@tour.Duration</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(tour.ImageUrl))
+                        {
+                            <img src="@tour.ImageUrl" alt="Tour Image" style="max-width: 100px; max-height: 100px;" />
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="7">
+                        <b>Места:</b>
+                        <ul>
+                            @if (tour.Places != null)
+                            {
+                                @foreach (var place in tour.Places)
+                                {
+                                    <li>@place.Name (@place.Latitude, @place.Longitude)</li>
+                                }
+                            }
+                        </ul>
+                        <b>Отзывы:</b>
+                        <ul>
+                            @if (tour.Reviews != null)
+                            {
+                                @foreach (var review in tour.Reviews)
+                                {
+                                    <li>@review.UserName - @review.Comment (@review.Rating)</li>
+                                }
+                            }
+                        </ul>
+                        <b>Добавить отзыв:</b>
+                        <EditForm Model="newReview" OnValidSubmit="() => SubmitReview(tour.Id)" FormName="reviewForm">
+                            <div class="form-group">
+                                <label for="userName">Имя:</label>
+                                <input type="text" id="userName" class="form-control" @bind="newReview.UserName" />
+                            </div>
+                            <div class="form-group">
+                                <label for="comment">Комментарий:</label>
+                                <textarea id="comment" class="form-control" @bind="newReview.Comment"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="rating">Рейтинг:</label>
+                                <input type="number" id="rating" class="form-control" min="1" max="5" @bind="newReview.Rating" />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Отправить</button>
+                        </EditForm>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Tour>? tours;
+    private Review newReview = new Review();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tours = await TourService.GetAllToursAsync();
+    }
+
+    private async Task SubmitReview(int tourId)
+    {
+        newReview.TourId = tourId;
+        await TourService.AddReviewAsync(newReview);
+        newReview = new Review(); // Очистить форму после отправки
+        tours = await TourService.GetAllToursAsync(); // Обновить список туров с новыми отзывами
+    }
+}
